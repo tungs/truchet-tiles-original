@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<!--
+Truchet Tiles
+Copyright (C) 2017  Steve Tung
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, as version 3 of the License.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+-->
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div id="container">
+      <div id="plane"></div>
+    </div>
+    <div id="controls">
+      <div>
+        <label>
+          Pattern: 
+        <select id="switchPreset">
+        </select>
+        </label>
+      </div>
+      <div>
+        <label>Autoplay: <input type="checkbox" id="autoplay" /></label>
+      </div>
+      <div>
+        <label>
+          Switch Style: 
+        <select id="switchStyle">
+          <option value="sequential">Sequential</option>
+          <option value="outIn">Out In</option>
+          <option value="inOut">In Out</option>
+          <option value="simultaneous">Simultaneous</option>
+          <option value="random">Random</option>
+        </select>
+        </label>
+      </div>
+      <div>
+        <label>
+          Switch Speed: 
+          <input type="range" id="switchSpeedInput" />
+        </label>
+      </div>
+      <div>
+        <label>Colors: <select id="colorsSelect">
+          <option value="none">None</option>
+          <option value="light">Light</option>
+          <option value="deep">Deep</option>
+        </select></label>
+      </div>
+      <div>
+        <label>
+          Manual Switch On: 
+        <select id="switchType">
+          <option value="click">Press</option>
+          <option value="hover" selected>Hover</option>
+        </select>
+        </label>
+      </div>
+      <div>
+        <label>Rows: <input type="number" id="rowsInput" /></label>
+        <label>Columns: <input type="number" id="columnsInput" /></label>
+      </div>
+      <div>
+        <div id="rotateLabel">
+          Rotate: 
+        </div>
+        <div id="rotationControl" draggable="true"></div>
+      </div>
+    </div>
+    <div class="attribution"><p>Steve Tung, 2017 <a href="https://github.com/tungs/" target="_blank">(GitHub)</a> <a href="https://twitter.com/@_tungs_/" target="_blank">(Twitter)</a></p><p><a href="https://en.wikipedia.org/wiki/Truchet_tiles" target="_blank">Read more about truchet tiles here</a>.</p></div>
+    <script src="presets.js"></script>
+    <script src="script.js"></script>
+  </body>
+</html>

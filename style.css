@@ -1,0 +1,192 @@
+/**
+ * Truchet Tiles
+ * Copyright (C) 2017  Steve Tung
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, as version 3 of the License.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+ 
+body, select, input {
+  font-family: 'Prompt', sans-serif;
+  font-size: 12px
+}
+
+#container {
+  perspective: 1200px;
+  perspective-origin: 50% 50%;
+  overflow: hidden;
+  position: relative;
+  display: inline-block;
+}
+
+#controls {
+  vertical-align: top;
+  display: inline-block;
+}
+
+#controls div {
+  white-space: nowrap;
+}
+
+#plane {
+  transform-style: preserve-3d;
+}
+
+#rotateLabel {
+  display: inline;
+  vertical-align: top;
+}
+
+#rotationControl {
+  height: 50px;
+  width: 50px;
+  border: 3px solid black;
+  display: inline-block;
+  background-color: yellow;
+  border-radius: 50%;
+}
+
+#rowsInput, #columnsInput {
+  width: 3em;
+}
+
+.tile {
+  position: absolute;
+  cursor: pointer;
+  left: 0;
+  top: 0;
+  display: block;
+  transform-style: preserve-3d;
+  transform-origin: 11px 11px;
+}
+
+.position {
+  position: absolute;
+  left: 0;
+  top: 0;
+  transform-style: preserve-3d;
+}
+
+.float-transform {
+  position: absolute;
+  transform-style: preserve-3d;
+}
+
+.top img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+
+.top, .front, .left, .right, .back {
+  position: absolute;
+  border: 1px solid black;
+  background-color: white;
+}
+
+.top {
+  width: 20px;
+  height: 20px;
+  text-align: center;
+}
+
+.front {
+  width: 20px;
+  height: 6px;
+  transform: rotateX(-90deg) translateZ(18px) translateY(3px);
+}
+
+.back {
+  width: 20px;
+  height: 6px;
+  transform: rotateX(90deg) translateZ(4px) translateY(-3px);
+}
+
+.left {
+  width: 20px;
+  height: 6px;
+  transform: rotateX(-90deg) rotateY(-90deg) translateZ(11px) translateY(3px) translateX(7px);
+}
+.right {
+  width: 20px;
+  height: 6px;
+  transform: rotateX(-90deg) rotateY(90deg) translateZ(11px)  translateY(3px) translateX(-7px);
+}
+
+.tile .top {
+  transition: background-color 4s;
+}
+
+.tile .top:hover {
+  transition: background-color 0.5s;
+  background-color: #777;
+}
+
+.deep-colors .rotating .top {
+  transition: background-color 0.25s;
+  background-color: #33F;
+}
+
+.light-colors .rotating .top {
+  transition: background-color 0.25s;
+  background-color: #99F;
+}
+
+.floating {
+  transform: translateZ(20px);
+}
+
+.deep-colors .rotating.state-1 .top {
+  transition: background-color 0.25s;
+  background-color: red;
+}
+
+.light-colors .rotating.state-1 .top {
+  transition: background-color 0.25s;
+  background-color: #F88;
+}
+
+.deep-colors .rotating.state-2 .top {
+  transition: background-color 0.25s;
+  background-color: darkorange;
+}
+
+.light-colors .rotating.state-2 .top {
+  transition: background-color 0.25s;
+  background-color: #FC4;
+}
+
+.deep-colors .rotating.state-3 .top {
+  transition: background-color 0.25s;
+  background-color: green;
+}
+
+.light-colors .rotating.state-3 .top {
+  transition: background-color 0.25s;
+  background-color: #8F8;
+}
+
+.attribution {
+  font-size: 10px;
+  font-style: italic;
+}
+
+a:link, a:visited {
+  text-decoration: none;
+}
+
+a:hover, a:active {
+  text-decoration: underline;
+}
