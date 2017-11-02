@@ -18,16 +18,17 @@
 
 var rows = 10;
 var columns = 10;
-var floatDuration = 250;
-var rotationDuration = 250;
 var planeDistance = 500;
 var floatHeight = 20;
 var tileSpacing = 22;
 var screenTileSize = 20;
+var maximumSharableRows = 20;
+var maximumSharableColumns = 20;
 var numRotateStates = 4;
 var autoplaying = false;
-var autoplayTimeoutMs = 1000;
-var speeds = [8000, 2000, 1000, 600, 500, 400, 350, 300, 250, 200, 150, 125, 100, 80, 65, 25, 12]; // milliseconds between tile switching
+var autoplayDelays = [7500, 6000, 4500, 3000, 1500, 975, 750, 500, 375, 215, 150, 50];
+var switchSpeeds = [2500, 2000, 1500, 1000, 500, 325, 250, 125, 75, 50];
+var switchFrequencies = [8000, 2000, 1000, 600, 500, 400, 350, 300, 250, 200, 150, 125, 100, 80, 65, 25, 12]; // milliseconds between tile switching
 var rotateX = 50, rotateY = 0;
 
 var hashString = window.location.hash;
@@ -42,16 +43,17 @@ if (hashString) {
 }
 
 if (urlKeyPairs.rows !== undefined) {
-  if (+urlKeyPairs.rows < 20) {
+  if (+urlKeyPairs.rows <= maximumSharableRows) {
     rows = +urlKeyPairs.rows;
   }
 }
 
 if (urlKeyPairs.columns !== undefined) {
-  if (+urlKeyPairs.columns < 20) {
+  if (+urlKeyPairs.columns <= maximumSharableColumns) {
     columns = +urlKeyPairs.columns;
   }
 }
+
 autoplaying = !!urlKeyPairs.autoplay;
 
 var getElementById = function (id) {
@@ -68,7 +70,7 @@ var preventDefault = function (event) {
   }
 };
 
-var switchType = getElementById('switchType');
+var manualSwitchType = getElementById('manualSwitchType');
 var container = getElementById('container');
 var plane = getElementById('plane');
 var switchPreset = getElementById('switchPreset');
@@ -78,10 +80,12 @@ var switchStyle = getElementById('switchStyle');
 var rowsInput = getElementById('rowsInput');
 var columnsInput = getElementById('columnsInput');
 var rotationControl = getElementById('rotationControl');
+var switchFrequencyInput = getElementById('switchFrequencyInput');
 var switchSpeedInput = getElementById('switchSpeedInput');
+var autoplayDelayInput = getElementById('autoplayDelay');
 
 var updatePlaneTransform = function () {
-  plane.style.transformOrigin = (+columns*tileSpacing/2) + 'px ' + (+rows*tileSpacing/2) + 'px 0';
+  plane.style.transformOrigin = (+columns * tileSpacing/2) + 'px ' + (+rows * tileSpacing/2) + 'px 0';
   plane.style.transform = 'translateZ(-' + planeDistance + 'px) rotateX(' + rotateX + 'deg) rotateY(' + rotateY + 'deg)';
 };
 updatePlaneTransform();
@@ -201,11 +205,33 @@ var resizePlane = function (newCols, newRows) {
   if (targetPresetIndex !== null) {
     targetPlaneState = mapState(presets[targetPresetIndex].state);
   }
+  updateLocationFromPlane();
 };
 
+switchFrequencyInput.min = 0;
+switchFrequencyInput.max = switchFrequencies.length - 1;
+switchFrequencyInput.value = Math.max(0, switchFrequencies.length-3);
+
 switchSpeedInput.min = 0;
-switchSpeedInput.max = speeds.length - 1;
-switchSpeedInput.value = Math.max(0, speeds.length-3);
+switchSpeedInput.max = switchSpeeds.length - 1;
+switchSpeedInput.value = Math.max(0, switchSpeeds.length-5);
+
+autoplayDelayInput.min = 0;
+autoplayDelayInput.max = autoplayDelays.length - 1;
+autoplayDelayInput.value = Math.max(0, autoplayDelays.length-6);
+
+if (urlKeyPairs.switchFrequencyIndex !== undefined) {
+  switchFrequencyInput.value = Math.min(Math.max(0, urlKeyPairs.switchFrequencyIndex), switchFrequencies.length);
+}
+
+if (urlKeyPairs.switchSpeedIndex !== undefined) {
+  switchSpeedInput.value = Math.min(Math.max(0, urlKeyPairs.switchSpeedIndex), switchSpeeds.length);
+}
+
+if (urlKeyPairs.autoplayDelayIndex !== undefined) {
+  autoplayDelayInput.value = Math.min(Math.max(0, urlKeyPairs.autoplayDelayIndex), autoplayDelays.length);
+}
+
 
 presets.forEach(function (state, i) {
   var option = createElement('option');
@@ -228,22 +254,24 @@ var updateLocation = function (config) {
   if (history.replaceState) {
     history.replaceState(null, null, hash);
   } else {
-    location.hash = hash;
+    window.location.hash = hash;
   }
 };
 
-var locationEncode = '0123456789abcdef';
+var urlStateEncode = '0123456789abcdef';
 var squaresPerCharacter = 2;
 var updateLocationFromPlane = function () {
   var i, j, locationData = [];
+  var sharableRows = Math.min(rows, maximumSharableRows);
+  var sharableColumns = Math.min(columns, maximumSharableColumns);
   var charSquareCount = 0;
   var currentData = 0;
-  for (j = 0; j < rows; j++) {
-    for (i = 0; i < columns; i++) {
+  for (j = 0; j < sharableRows; j++) {
+    for (i = 0; i < sharableColumns; i++) {
       currentData = currentData * numRotateStates + (tiles[j][i].getTargetState()%numRotateStates);
       charSquareCount++;
       if (charSquareCount === squaresPerCharacter) {
-        locationData.push(locationEncode.charAt(currentData));
+        locationData.push(urlStateEncode.charAt(currentData));
         charSquareCount = 0;
         currentData = 0;
       }
@@ -253,18 +281,21 @@ var updateLocationFromPlane = function () {
     while (charSquareCount < squaresPerCharacter) {
       currentData = currentData * numRotateStates;
     }
-    locationData.push(locationEncode.charAt(currentData));
+    locationData.push(urlStateEncode.charAt(currentData));
   }
   updateLocation({
-    rows: rows,
-    columns: columns,
+    rows: sharableRows,
+    columns: sharableColumns,
     colors: colorsSelect.value,
     switchStyle: switchStyle.value,
+    switchFrequencyIndex: switchFrequencyInput.value,
+    switchSpeedIndex: switchSpeedInput.value,
+    autoplay: autoplayCheckbox.checked,
     state: locationData.join('')
   });
 };
 var decodePlaneCharacter = function (c) {
-  var num = locationEncode.indexOf(c);
+  var num = urlStateEncode.indexOf(c);
   var nums = [], i;
   if (num === -1) {
     num = 0;
@@ -288,7 +319,7 @@ var setTargetStateFromPlaneData = function (data) {
         if (currentCharIndex < data.length) {
           nums = decodePlaneCharacter(data[currentCharIndex]);
         } else {
-          nums = decodePlaneCharacter(locationEncode[0]);
+          nums = decodePlaneCharacter(urlStateEncode[0]);
         }
         currentCharIndex++;
       }
@@ -344,6 +375,7 @@ var createTile = function (i, j) {
   var img = createElement('img');
   var floatTransitionStartTime = null;
   var rotationTransitionStartTime = null;
+  var floatDuration, rotationDuration;
   var floating = false;
   var targetState = 0;
   img.src = 'truchet_tile_original.svg';
@@ -364,12 +396,13 @@ var createTile = function (i, j) {
   tile.appendChild(left);
   tile.appendChild(right);
   position.className = 'position';
-  var toggleStateInput = function () {
+  var toggleState = function () {
     if (floatTransitionStartTime || rotationTransitionStartTime) {
       return;
     }
     targetState = (rotateState + 1) % numRotateStates;
     floatTransitionStartTime = binnedTime;
+    floatDuration = switchSpeeds[switchSpeedInput.value];
     floating = true;
     updateLocationFromPlane();
     runAnimation();
@@ -379,6 +412,7 @@ var createTile = function (i, j) {
     if (!floatTransitionStartTime && !rotationTransitionStartTime &&
       rotateState !== targetState) {
       floatTransitionStartTime = binnedTime;
+      floatDuration = switchSpeeds[switchSpeedInput.value];
       floating = true;
       runAnimation();
     }
@@ -396,7 +430,6 @@ var createTile = function (i, j) {
   var updateAnimation = function () {
     var t;
     var transitionEndTime;
-    var rotationDistance;
     if (!running) {
       return;
     }
@@ -412,16 +445,19 @@ var createTile = function (i, j) {
             rotateState = targetState;
             setStateClass(tile, rotateState);
             rotationTransitionStartTime = transitionEndTime;
+            rotationDuration = switchSpeeds[switchSpeedInput.value] * (Math.abs(previousRotateState - rotateState) === 2 ? 2 : 1);
             tile.classList.toggle('rotating', true);
           } else {
             rotationTransitionStartTime = null;
             floatTransitionStartTime = transitionEndTime;
+            floatDuration = switchSpeeds[switchSpeedInput.value];
             floating = false;
             tile.classList.toggle('rotating', false);
           }
         } else {
           if (rotateState !== targetState) {
             floatTransitionStartTime = transitionEndTime;
+            floatDuration = switchSpeeds[switchSpeedInput.value];
             rotationTransitionStartTime = null;
             floating = true;
           } else {
@@ -432,23 +468,21 @@ var createTile = function (i, j) {
       }
     }
     if (rotationTransitionStartTime) {
-      rotationDistance = Math.abs(previousRotateState - rotateState);
-      if (rotationDistance === 0 || rotationDistance === 3) {
-        rotationDistance = 1;
-      }
-      t = Math.min(1, (binnedTime - rotationTransitionStartTime) / (rotationDistance * rotationDuration));
+      t = Math.min(1, (binnedTime - rotationTransitionStartTime) / (rotationDuration));
       tile.style.transform = getEasedRotationTransform(t, previousRotateState, rotateState);
       if (t === 1) {
-        transitionEndTime = rotationTransitionStartTime + (rotationDistance * rotationDuration);
+        transitionEndTime = rotationTransitionStartTime + (rotationDuration);
         if (rotateState !== targetState) {
           previousRotateState = rotateState;
           rotateState = targetState;
           setStateClass(tile, rotateState);
           rotationTransitionStartTime = transitionEndTime;
+          rotationDuration = switchSpeeds[switchSpeedInput.value] * (Math.abs(previousRotateState - rotateState) === 2 ? 2 : 1);
           floatTransitionStartTime = null;
           tile.classList.toggle('rotating', true);
         } else {
           floatTransitionStartTime = binnedTime;
+          floatDuration = switchSpeeds[switchSpeedInput.value];
           floating = false;
           rotationTransitionStartTime = null;
           tile.classList.toggle('rotating', false);
@@ -462,20 +496,17 @@ var createTile = function (i, j) {
     tile.remove();
   };
   tile.addEventListener('mouseenter', function () {
-    if (switchType.value !== 'hover') {
+    if (manualSwitchType.value !== 'hover') {
       return;
     }
-    toggleStateInput();
+    toggleState();
   });
   tile.addEventListener('click', function () {
-    if (switchType.value !== 'click') {
-      return;
-    }
-    toggleStateInput();
+    toggleState();
   });
   tile.addEventListener('touchstart', function (e) {
     e.preventDefault();
-    toggleStateInput();
+    toggleState();
   });
   position.style.transform = 'translateX( ' + i * tileSpacing + 'px) translateY( ' + j * tileSpacing + 'px )';
   setStateClass(tile, rotateState);
@@ -499,7 +530,7 @@ var switchToTargetState = function () {
     var i, j, ind;
     var switchType = switchStyle.value;
     var items = [], item;
-    var speedTimeout = speeds[switchSpeedInput.value];
+    var speedTimeout = switchFrequencies[switchFrequencyInput.value];
     for (j = 0; j < rows; j++) {
       for (i = 0; i < columns; i++) {
         if (tiles[j][i].getTargetState() !== targetPlaneState[j][i]) {
@@ -534,9 +565,10 @@ var switchToTargetState = function () {
       }
       presetTimeout = setTimeout(switchSquare, Math.floor(Math.random()*25 + speedTimeout));
     } else {
+      updatePlaneTransform();
       autoplayTimeout = setTimeout(function () {
         autoplayNext();
-      }, autoplayTimeoutMs);
+      }, autoplayDelays[autoplayDelayInput.value]);
     }
   };
   switchSquare();
@@ -562,6 +594,7 @@ var autoplayNext = function () {
 };
 
 autoplayCheckbox.addEventListener('change', function () {
+  autoplayDelayInput.disabled = !autoplayCheckbox.checked;
   autoplayNext();
 });
 
@@ -662,13 +695,20 @@ rotationControl.addEventListener('touchmove', rotationControlTouchHandler);
 
 container.addEventListener('touchmove', preventDefault);
 
+autoplayCheckbox.addEventListener('change', updateLocationFromPlane);
+autoplayDelayInput.addEventListener('change', updateLocationFromPlane);
+switchStyle.addEventListener('change', updateLocationFromPlane);
+switchFrequencyInput.addEventListener('change', updateLocationFromPlane);
+switchSpeedInput.addEventListener('change', updateLocationFromPlane);
+colorsSelect.addEventListener('change', updateLocationFromPlane);
+
 if (urlKeyPairs.colors !== undefined) {
   colorsSelect.value = urlKeyPairs.colors;
   colorsSelectChanged();
 }
 
-if (urlKeyPairs['switchStyle'] !== undefined) {
-  switchStyle.value = urlKeyPairs['switchStyle'];
+if (urlKeyPairs.switchStyle !== undefined) {
+  switchStyle.value = urlKeyPairs.switchStyle;
 }
 
 if (urlKeyPairs.state !== undefined) {
@@ -682,3 +722,5 @@ if (autoplaying) {
     autoplayNext();
   }
 }
+
+autoplayDelayInput.disabled = !autoplayCheckbox.checked;

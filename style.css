@@ -16,8 +16,35 @@
  */
  
 body, select, input {
-  font-family: 'Prompt', sans-serif;
-  font-size: 12px
+  font-family: sans-serif;
+  font-size: 12px;
+  text-align: center;
+}
+
+input[type="range"] {
+  width: 80px;
+}
+
+.description, .references {
+  max-width: 600px;
+  font-size: 16px;
+  margin: 5px auto;
+  text-align: left;
+}
+
+sup {
+  vertical-align: baseline;
+  position: relative;
+  top: -0.4em;
+  line-height: 100%;
+}
+#controls {
+  text-align: left;
+}
+
+.description-control {
+  cursor: pointer;
+  font-weight: bold;
 }
 
 #container {

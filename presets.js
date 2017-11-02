@@ -278,6 +278,10 @@ var presets = [
     state: stateFromQuadrant([1,0,2,3])
   },
   {
+    displayName: 'Concentric 2',
+    state: stateFromQuadrant([1,0,0,1])
+  },
+  {
     displayName: 'Cubes?',
     state: stateFromPattern([
       [1,2],
@@ -306,15 +310,9 @@ var presets = [
     ])
   },
   {
-    displayName: 'Misc',
+    displayName: 'Vines',
     state: function (i, j) {
       return j%2 ? i%2 : i%2+2;
-    }
-  },
-  {
-    displayName: 'Zig Zag',
-    state: function (i, j) {
-      return i%2 ? (j % 2) : (j%2)+2;
     }
   }
 ];
