@@ -291,6 +291,7 @@ var updateLocationFromPlane = function () {
     switchFrequencyIndex: switchFrequencyInput.value,
     switchSpeedIndex: switchSpeedInput.value,
     autoplay: autoplayCheckbox.checked,
+    autoplayDelayIndex: autoplayDelayInput.value,
     state: locationData.join('')
   });
 };
