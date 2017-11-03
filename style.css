@@ -38,6 +38,7 @@ sup {
   top: -0.4em;
   line-height: 100%;
 }
+
 #controls {
   text-align: left;
 }
@@ -162,12 +163,12 @@ sup {
 }
 
 .deep-colors .rotating .top {
-  transition: background-color 0.25s;
+  transition: background-color 0.125s;
   background-color: #33F;
 }
 
 .light-colors .rotating .top {
-  transition: background-color 0.25s;
+  transition: background-color 0.125s;
   background-color: #99F;
 }
 
@@ -176,32 +177,26 @@ sup {
 }
 
 .deep-colors .rotating.state-1 .top {
-  transition: background-color 0.25s;
   background-color: red;
 }
 
 .light-colors .rotating.state-1 .top {
-  transition: background-color 0.25s;
   background-color: #F88;
 }
 
 .deep-colors .rotating.state-2 .top {
-  transition: background-color 0.25s;
   background-color: darkorange;
 }
 
 .light-colors .rotating.state-2 .top {
-  transition: background-color 0.25s;
   background-color: #FC4;
 }
 
 .deep-colors .rotating.state-3 .top {
-  transition: background-color 0.25s;
   background-color: green;
 }
 
 .light-colors .rotating.state-3 .top {
-  transition: background-color 0.25s;
   background-color: #8F8;
 }
 
